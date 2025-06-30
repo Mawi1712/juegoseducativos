@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Juego de Secuencias</title>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding-bottom: 120px;
+      font-family: 'Raleway', sans-serif;
+      background: linear-gradient(-45deg, #6a0dad, #0f52ba, #8b0000);
+      background-size: 400% 400%;
+      animation: fondoAnimado 12s ease infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: white;
+      text-align: center;
+      overflow-x: hidden;
+      flex-direction: column;
+      position: relative;
+    }
+    @keyframes fondoAnimado {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .pantalla {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.15);
+      max-width: 600px;
+      width: 90%;
+      animation: fadeIn 0.7s ease;
+      position: relative;
+      margin: auto;
+      z-index: 2;
+    }
+    .pantalla.activa {
+      display: flex;
+    }
+    #pantallaInicio img {
+      width: 150px;
+      margin-bottom: 20px;
+    }
+    #tituloBienvenida {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ff66cc;
+      margin-bottom: 12px;
+    }
+    #descripcionJuego {
+      font-size: 1.2rem;
+      color: #f2c1d1;
+      margin-bottom: 25px;
+      max-width: 480px;
+      line-height: 1.4;
+    }
+    .boton {
+      margin: 10px;
+      padding: 15px 25px;
+      background-color: #ff66cc;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      min-width: 140px;
+    }
+    .boton:hover {
+      background-color: #cc3399;
+      transform: scale(1.05);
+    }
+    /* Panel superior */
+    #panelSuperior {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      color: #00ffc3;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 10px;
+      box-sizing: border-box;
+      z-index: 20;
+      flex-wrap: wrap;
+    }
+    #panelSuperior > div {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    #panelSuperior #timer {
+      font-size: 0.9em;
+    }
+    #panelSuperior #preguntaInfo {
+      font-size: 0.9em;
+    }
+    #panelSuperior #motivacion img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #00ffc3;
+    }
+    #panelSuperior button {
+      font-size: 0.8em;
+      padding: 4px 8px;
+      margin-left: 5px;
+      background: #00ffc3;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    #panelSuperior button:hover {
+      background: #00c2a8;
+    }
+    .encabezado {
+      display: none;
+    }
+    #preguntaSecuencia {
+      font-size: 1.6rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    #personaje {
+      width: 100px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+    #contenedorSecuencia {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+      width: 100%;
+    }
+    .opcionSecuencia {
+      background-color: rgba(255, 255, 255, 0.15);
+      border: 2px solid white;
+      padding: 15px 25px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1.4rem;
+      transition: 0.3s ease;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      width: 80%;
+      max-width: 300px;
+    }
+    .opcionSecuencia:hover {
+      background-color: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+    #temporizador {
+      margin: 10px 0;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-shadow: 1px 1px 3px black;
+    }
+    #resultadoFinal {
+      font-size: 1.3rem;
+      margin-top: 20px;
+      line-height: 1.4;
+      text-align: left;
+      width: 100%;
+    }
+    #pantallaTutorial .pantalla {
+      max-width: 800px;
+    }
+    #pantallaTutorial video {
+      width: 100%;
+      max-width: 800px;
+      max-height: 450px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,255,180,0.3);
+      margin-bottom: 20px;
+    }
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      color: #00ffc3;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      box-sizing: border-box;
+      font-size: 0.85em;
+      z-index: 10;
+      flex-wrap: wrap;
+      border-top: 1px solid #00ffc3;
+    }
+    footer .izquierda, footer .centro, footer .derecha {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    footer .izquierda {
+      flex: 1;
+    }
+    footer .centro {
+      flex: 1;
+      justify-content: center;
+    }
+    footer .derecha {
+      flex: 1;
+      justify-content: flex-end;
+    }
+    footer a {
+      display: flex;
+      align-items: center;
+      color: #00ffc3;
+      text-decoration: none;
+      gap: 8px;
+      transition: color 0.3s;
+    }
+    footer a:hover {
+      color: #ff66cc;
+    }
+    footer img.icono {
+      width: 24px;
+      height: 24px;
+      filter: drop-shadow(0 0 4px #00ffc3);
+      transition: transform 0.3s;
+    }
+    footer img.icono:hover {
+      transform: scale(1.2);
+    }
+    footer .derecha img.logo {
+      height: 60px;
+      width: auto;
+      animation: logoPulse 4s infinite ease-in-out;
+    }
+    @keyframes logoPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    @media (max-width: 600px) {
+      .pantalla {
+        padding: 20px 15px;
+        width: 95%;
+      }
+      #panelSuperior {
+        padding: 5px;
+      }
+      #panelSuperior #timer, #panelSuperior #preguntaInfo {
+        font-size: 0.8em;
+      }
+      #panelSuperior #motivacion img {
+        width: 20px;
+        height: 20px;
+      }
+      #panelSuperior button {
+        padding: 4px 6px;
+        font-size: 0.7em;
+      }
+      .boton {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+      }
+      #preguntaSecuencia {
+        font-size: 1.4rem;
+      }
+      .opcionSecuencia {
+        padding: 12px 20px;
+        font-size: 1.2rem;
+        width: 90%;
+      }
+      #personaje {
+        width: 80px;
+      }
+      footer {
+        padding: 10px;
+        font-size: 0.75em;
+      }
+      footer .derecha img.logo {
+        height: 50px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="panelSuperior" style="display:none;">
+    <div id="timer">00:00</div>
+    <div id="preguntaInfo">Pregunta 0</div>
+    <div id="motivacion"><span id="textoMotivacion">Tú puedes!</span><img src="recursos/colegio.png" alt="Mascota"></div>
+    <div>
+      <button onclick="toggleFullscreen()">⛶</button>
+    </div>
+  </div>
+
+  <div id="pantallaInicio" class="pantalla activa">
+    <img src="recursos/portada.png" alt="Logo" />
+    <h1 id="tituloBienvenida">Bienvenido Jugador a: Juego de Secuencias</h1>
+    <p id="descripcionJuego">
+      En este juego deberás completar patrones o series lógicas.<br> 
+      ¡Usa tu razonamiento y atención para superar todos los niveles!
+    </p>
+    <h3>Seleccione la dificultad:</h3>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin:15px 0;">
+      <button class="boton" onclick="iniciarTutorial('facil')">Fácil</button>
+      <button class="boton" onclick="iniciarTutorial('medio')">Medio</button>
+      <button class="boton" onclick="iniciarTutorial('dificil')">Difícil</button>
+    </div>
+    <button class="boton" onclick="volver()">Volver a la Principal</button>
+  </div>
+
+  <div id="pantallaTutorial" class="pantalla">
+    <h2 style="color:#ff66cc; margin-bottom:15px;">Video Tutorial</h2>
+    <video id="videoTutorial" autoplay muted loop playsinline>
+      <source src="recursos/tutorial.mp4" type="video/mp4">
+    </video>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:15px;">
+      <button class="boton" onclick="volverAPantallaInicio()">Volver</button>
+      <button class="boton" onclick="iniciarJuegoDesdeTutorial()">Iniciar Juego</button>
+    </div>
+  </div>
+
+  <div id="pantallaJuego" class="pantalla">
+    <div id="preguntaSecuencia"></div>
+    <img id="personaje" src="" alt="Personaje" style="display:none;"/>
+    <div id="contenedorSecuencia"></div>
+    <div id="temporizador"></div>
+  </div>
+
+  <div id="pantallaResultado" class="pantalla">
+    <h2 id="tituloResultado"></h2>
+    <div id="resultadoFinal"></div>
+    <button class="boton" onclick="reiniciar()">Volver a jugar</button>
+  </div>
+
+  <div id="settingsModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:30;">
+    <div style="background: rgba(255,255,255,0.1); padding:20px; border-radius:12px; width:90%; max-width:400px; text-align:center;">
+      <h2 style="color:#ff66cc;">Ajustes</h2>
+      <div id="google_translate_element"></div>
+      <button class="boton" onclick="cerrarSettings()">Cerrar</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="izquierda">
+      <span>Juego hecho por:</span>
+      <a href="https://wa.me/+51939417590" target="_blank"><img class="icono" src="recursos/whatsapp.png" alt="WhatsApp">Lucia Vilca</a>
+      <a href="https://wa.me/1234567891" target="_blank"><img class="icono" src="recursos/whatsapp.png" alt="WhatsApp">Camila Chavez</a>
+      <a href="https://wa.me/1234567892" target="_blank"><img class="icono" src="recursos/whatsapp.png" alt="WhatsApp">Jimena Magaño</a>
+      <a href="https://wa.me/1234567893" target="_blank"><img class="icono" src="recursos/whatsapp.png" alt="WhatsApp">Yuliana Rodriguez</a>
+    </div>
+    <div class="centro">
+      <a href="https://www.facebook.com/"><img class="icono" src="recursos/facebook.png" alt="Facebook"></a>
+      <a href="https://x.com/?lang=es"><img class="icono" src="recursos/instagram.png" alt="Instagram"></a>
+      <a href="https://www.instagram.com/"><img class="icono" src="recursos/twitter.png" alt="Twitter"></a>
+      <a href="tiktok.com"><img class="icono" src="recursos/tiktok.png" alt="TikTok"></a>
+    </div>
+    <div class="derecha">
+      <span>© 2025 MiEmpresa. Todos los derechos reservados.</span>
+      <a href="https://www.colegioasuncion.edu.pe/"><img class="logo" src="recursos/colegio.png" alt="Logo Empresa"></a>
+    </div>
+  </footer>
+
+  <script>
+    const nombre = localStorage.getItem('nombreJugador') || 'Jugador';
+    function mostrarNombreEnPantallas() {
+      document.getElementById('tituloBienvenida').textContent = `Bienvenido ${nombre} a: Juego de Secuencias`;
+      document.getElementById('textoMotivacion').textContent = `¡Tú puedes, ${nombre}!`;
+      document.getElementById('tituloResultado').textContent = `Resultados de ${nombre}`;
+    }
+    mostrarNombreEnPantallas();
+
+    let nivelActual = '';
+    let aciertos = 0;
+    let fallos = 0;
+    let inicioTiempo = 0;
+    let timerInterval = null;
+    let indexPregunta = 0;
+    let totalPreguntas = 0;
+
+    function mostrarPantalla(id) {
+      document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+      document.getElementById(id).classList.add('activa');
+    }
+    function volver() {
+      window.location.href = "../index.html";
+    }
+    function iniciarTutorial(nivel) {
+      nivelActual = nivel;
+      mostrarPantalla('pantallaTutorial');
+      document.getElementById('panelSuperior').style.display = 'none';
+      document.getElementById("textoMotivacion").textContent = `¡Tú puedes, ${nombre}!`;
+    }
+    function volverAPantallaInicio() {
+      mostrarPantalla('pantallaInicio');
+    }
+
+    function iniciarJuegoDesdeTutorial() {
+      if (nivelActual === 'facil') {
+        totalPreguntas = 10;
+      } else if (nivelActual === 'medio') {
+        totalPreguntas = 15;
+      } else {
+        totalPreguntas = 20;
+      }
+      aciertos = 0;
+      fallos = 0;
+      indexPregunta = 0;
+      document.getElementById('panelSuperior').style.display = 'flex';
+      document.getElementById('timer').textContent = '00:00';
+      document.getElementById('preguntaInfo').textContent = `Pregunta 1 de ${totalPreguntas}`;
+      document.getElementById("textoMotivacion").textContent = `¡Tú puedes, ${nombre}!`;
+      mostrarPantalla('pantallaJuego');
+      document.getElementById('contenedorSecuencia').innerHTML = '';
+      inicioTiempo = Date.now();
+      clearInterval(timerInterval);
+      actualizarTimer();
+      timerInterval = setInterval(actualizarTimer, 500);
+      mostrarSecuencia();
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+    function abrirSettings() {
+      document.getElementById("settingsModal").style.display = 'flex';
+    }
+    function cerrarSettings() {
+      document.getElementById("settingsModal").style.display = 'none';
+    }
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement(
+        {pageLanguage:'es', layout:google.translate.TranslateElement.InlineLayout.SIMPLE},
+        'google_translate_element'
+      );
+    }
+
+    function actualizarTimer() {
+      const elapsed = Date.now() - inicioTiempo;
+      const seconds = Math.floor(elapsed / 1000) % 60;
+      const minutes = Math.floor(elapsed / 60000);
+      const mm = minutes.toString().padStart(2, "0");
+      const ss = seconds.toString().padStart(2, "0");
+      document.getElementById("timer").textContent = `${mm}:${ss}`;
+    }
+
+    function generarSecuenciaNivel(nivel) {
+      const tipoLista = ['aritmética', 'geométrica', 'fibonacci', 'alternante'];
+      let tipo;
+      if (nivel === 'facil') tipo = 'aritmética';
+      else if (nivel === 'medio') tipo = tipoLista[Math.floor(Math.random() * 2)]; 
+      else tipo = tipoLista[Math.floor(Math.random() * tipoLista.length)]; 
+      let seq = [];
+      let correcto;
+      if (tipo === 'aritmética') {
+        const diff = Math.floor(Math.random() * (nivel==='facil'?5: nivel==='medio'?10:15)) + 1;
+        const start = Math.floor(Math.random() * 5) + 1;
+        const length = nivel==='facil'?4: nivel==='medio'?5:6;
+        for (let i = 0; i < length; i++) {
+          seq.push(start + i * diff);
+        }
+        correcto = start + length * diff;
+      } else if (tipo === 'geométrica') {
+        const ratio = Math.floor(Math.random() * (nivel==='medio'?2: nivel==='dificil'?3:1)) + 2;
+        const start = Math.floor(Math.random() * 3) + 1;
+        const length = nivel==='medio'?4:6;
+        seq.push(start);
+        for (let i = 1; i < length; i++) {
+          seq.push(seq[i-1] * ratio);
+        }
+        correcto = seq[length-1] * ratio;
+      } else if (tipo === 'fibonacci') {
+        let a = Math.floor(Math.random() * 3) + 1;
+        let b = Math.floor(Math.random() * 3) + 1;
+        seq = [a, b];
+        const length = 5;
+        for (let i = 2; i < length; i++) {
+          seq.push(seq[i-1] + seq[i-2]);
+        }
+        correcto = seq[length-1] + seq[length-2];
+      } else if (tipo === 'alternante') {
+        const n = Math.floor(Math.random() * 5) + 1;
+        const m = Math.floor(Math.random() * 5) + 1;
+        const start = Math.floor(Math.random() * 10) + 1;
+        const length = nivel==='dificil'?6:5;
+        seq.push(start);
+        for (let i = 1; i < length; i++) {
+          if (i % 2 === 1) seq.push(seq[i-1] + n);
+          else seq.push(seq[i-1] - m > 0 ? seq[i-1] - m : seq[i-1] + n);
+        }
+        if (length % 2 === 1) correcto = seq[length-1] + n;
+        else correcto = seq[length-1] - m > 0 ? seq[length-1] - m : seq[length-1] + n;
+      }
+      return { seq, correcto };
+    }
+
+    function mostrarSecuencia() {
+      if (indexPregunta >= totalPreguntas) {
+        finalizarJuego();
+        return;
+      }
+      const data = generarSecuenciaNivel(nivelActual);
+      const seq = data.seq;
+      const correcto = data.correcto;
+      indexPregunta++;
+      document.getElementById("preguntaInfo").textContent = `Pregunta ${indexPregunta} de ${totalPreguntas}`;
+      document.getElementById('preguntaSecuencia').textContent = `Completa la secuencia: ${seq.join(', ')}, ?`;
+      const personajes = ['personaje1.png','personaje2.png','personaje3.png','personaje4.png','personaje5.png'];
+      const imgEl = document.getElementById('personaje');
+      imgEl.src = 'recursos/' + personajes[Math.floor(Math.random() * personajes.length)];
+      imgEl.style.display = 'block';
+
+      const contenedor = document.getElementById('contenedorSecuencia');
+      contenedor.innerHTML = '';
+      const opciones = [correcto];
+      while (opciones.length < 4) {
+        let delta = Math.floor(Math.random() * 10) + 1;
+        let sign = Math.random() < 0.5 ? -1 : 1;
+        let val = correcto + sign * delta;
+        if (val > 0 && !opciones.includes(val)) opciones.push(val);
+      }
+      opciones.sort(() => Math.random() - 0.5);
+      opciones.forEach(op => {
+        const div = document.createElement('div');
+        div.className = 'opcionSecuencia';
+        div.textContent = op;
+        div.onclick = () => verificarRespuesta(op, correcto);
+        contenedor.appendChild(div);
+      });
+    }
+
+    function verificarRespuesta(elegido, correcto) {
+      if (elegido === correcto) {
+        aciertos++;
+      } else {
+        fallos++;
+      }
+      if (indexPregunta >= totalPreguntas) {
+        finalizarJuego();
+      } else {
+        mostrarSecuencia();
+      }
+    }
+
+    function finalizarJuego() {
+      clearInterval(timerInterval);
+      document.getElementById('panelSuperior').style.display = 'none';
+      mostrarPantalla('pantallaResultado');
+      const tiempoFinal = Math.floor((Date.now() - inicioTiempo) / 1000);
+      document.getElementById('resultadoFinal').innerHTML = `
+        <p><strong>⏳ Tiempo total:</strong> ${tiempoFinal} segundos</p>
+        <p><strong>✅ Aciertos:</strong> ${aciertos}</p>
+        <p><strong>❌ Fallos:</strong> ${fallos}</p>
+      `;
+    }
+
+    function reiniciar() {
+      document.getElementById('panelSuperior').style.display = 'none';
+      indexPregunta = 0;
+      clearInterval(timerInterval);
+      aciertos = 0;
+      fallos = 0;
+      mostrarPantalla('pantallaInicio');
+    }
+  </script>
+  <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>
